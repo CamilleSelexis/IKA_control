@@ -5,7 +5,7 @@
 #include <SPI.h>
 // Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(1, 2, 3, 4);
-//Ethernet Shield use pin 9,10,11,12 for standard SPI
+//Ethernet Shield use pin 10,11,12,13 for standard SPI
 
 // The value of the Rref resistor. Use 430.0 for PT100 and 4300.0 for PT1000
 #define RREF      4300.0
@@ -142,11 +142,11 @@ void loop() {
           c = client.read();
         }
         if(currentLine == "home"){ homePage(client_pntr);}
-        if(currentLine == "MagnetsON"){ magnetEnable = true;}
-        if(currentLine == "MagnetsOFF"){ magnetEnable  = false;}
-        if(currentLine == "HeatingON"){ heatingEnable = true;}
-        if(currentLine == "HeatingOFF"){ heatingEnable = false;}
-        if(currentLine == "ResetController"){ software_reset();}
+        if(currentLine == "MagnetsON"){ magnetEnable = true; homePage(client_pntr);}
+        if(currentLine == "MagnetsOFF"){ magnetEnable  = false; homePage(client_pntr);}
+        if(currentLine == "HeatingON"){ heatingEnable = true; homePage(client_pntr);}
+        if(currentLine == "HeatingOFF"){ heatingEnable = false; homePage(client_pntr);}
+        if(currentLine == "ResetController"){homePage(client_pntr); software_reset();}
       }
       //Serial.println("client connected");
       if(millis()-time_connection> TIMEOUT_ETH)
@@ -160,6 +160,16 @@ void loop() {
 void software_reset() {
   asm volatile (" jmp 0");  
 }
+
+
+int getStatus() {
+
+  if(magnetEnable && heatingEnable) return 3;
+  if(magnetEnable && !heatingEnable) return 2;
+  if(!magnetEnable && heatingEnable) return 1;
+  return 0;
+}
+
 
 bool checkFaultRTD(){
   uint8_t fault = thermo.readFault();
@@ -199,55 +209,4 @@ bool initEthernet(){
   //Serial.println(Ethernet.localIP());         //Gives the local IP through serial com
   Serial.println(strIP);
   return true;
-}
-
-void homePage(EthernetClient *client_pntr){
-  Serial.println("home");
-  int state = getStatus();
-  long current_time = millis();
-  int seconds = (int) (current_time / 1000) % 60 ;
-  int minutes = (int) ((current_time / (1000*60)) % 60);
-  int hours   = (int) ((current_time / (1000*60*60)) % 24);
-  char c[30];
-  int l = sprintf(c, "%02d:%02d:%02d",hours,minutes,seconds);
-  client_pntr->println(F("HTTP/1.1 200 OK"));
-  client_pntr->println(F("Content-Type: text/html"));
-  client_pntr->println(F("Connection: close"));  // the connection will be closed after completion of the response
-  client_pntr->println(F("Refresh: 5"));  // refresh the page automatically every 5 sec
-  client_pntr->println();
-  client_pntr->println(F("<!DOCTYPE HTML>"));
-  client_pntr->println(F("<html>"));
-  client_pntr->println(F("<body>"));
-  client_pntr->print("<h1 style=\"text-align:center\">IKA Controller  </h1>");
-  client_pntr->print("<p> Heating : ");
-  if(heatingEnable) client_pntr->print("<strong style= \"background-color:#00ff00\"> ON </strong>");
-  else client_pntr->print("<strong style= \"background-color:#ff0000\"> OFF </strong>");
-  client_pntr->print("</p> <p> Magnets : ");
-  if(magnetEnable) client_pntr->print("<strong style= \"background-color:#00ff00\"> ON </strong>");
-  else client_pntr->print("<strong style= \"background-color:#ff0000\"> OFF </strong>");
-  String temp_below_color = "<strong style= \"background-color:#0000ff\">";
-  String temp_above_color = "<strong style= \"background-color:#ff0000\">";
-  client_pntr->print("</p> <p> Current Temperature : " + (temp<setpoint ? temp_below_color:temp_above_color));client_pntr->print(temp);client_pntr->print("</strong> Setpoint : " + String(setpoint)+ "</p>");
-  client_pntr->print(F("<p><a href=\"http://192.168.1.91/HeatingON\">Enable Heating</a></p>"));
-  client_pntr->print(F("<p><a href=\"http://192.168.1.91/HeatingOFF\">Disable Heating</a></p>"));
-  client_pntr->print(F("<p><a href=\"http://192.168.1.91/MagnetsON\">Enable Magnets</a></p>"));
-  client_pntr->print(F("<p><a href=\"http://192.168.1.91/MagnetsOFF\">Disable Magnets</a></p>"));
-  
-  client_pntr->print(F("Connection closed by the server at internal time : "));client_pntr->print(millis());
-  //Close the connection
-  client_pntr->print("</body>");
-  client_pntr->print("</html>");
-  delay(10);
-  //client_pntr->flush();
-  while (client_pntr->read() != -1);
-  ////Serial.println("Client stop called");
-  client_pntr->stop();
-}
-
-int getStatus() {
-
-  if(magnetEnable && heatingEnable) return 3;
-  if(magnetEnable && !heatingEnable) return 2;
-  if(!magnetEnable && heatingEnable) return 1;
-  return 0;
 }
