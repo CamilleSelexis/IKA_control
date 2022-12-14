@@ -30,6 +30,8 @@ void homePage(EthernetClient *client_pntr){
   client_pntr->print(temp);
   client_pntr->print("</strong> Setpoint : ");client_pntr->print(setpoint);
   client_pntr->print(" Error : ");client_pntr->print(error);client_pntr->println("</p>");
+  client_pntr->print("Current PID parameters : Kp = ");client_pntr->print(Kp);client_pntr->print(" Kd = ");client_pntr->print(Kd);
+  client_pntr->print(" Ki = ");client_pntr->print(Ki);client_pntr->print(" Cycle Time = "); client_pntr->print(PID_TIME);
   client_pntr->println(F("<p><a href=\"http://192.168.1.91/HeatingON\">Enable Heating</a></p>"));
   client_pntr->println(F("<p><a href=\"http://192.168.1.91/HeatingOFF\">Disable Heating</a></p>"));
   client_pntr->println(F("<p><a href=\"http://192.168.1.91/MagnetsON\">Enable Magnets</a></p>"));
@@ -43,5 +45,18 @@ void homePage(EthernetClient *client_pntr){
   //client_pntr->flush();
   while (client_pntr->read() != -1);
   ////Serial.println("Client stop called");
+  client_pntr->stop();
+}
+void AnswerHttp(EthernetClient *client_pntr){
+  client_pntr->println(F("HTTP/1.1 200 OK"));
+  /*client_pntr->println(F("Content-Type: text/html"));
+  client_pntr->println(F("Connection: close"));  // the connection will be closed after completion of the response
+  client_pntr->println();*/
+  client_pntr->print("status=");client_pntr->println(getStatus());
+  client_pntr->print("temperature=");client_pntr->println(temp);
+  client_pntr->print("time=");client_pntr->println(millis());
+
+  //close the connection
+  while (client_pntr->read() != -1);
   client_pntr->stop();
 }

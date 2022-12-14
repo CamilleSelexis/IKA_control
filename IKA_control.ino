@@ -4,7 +4,7 @@
 #include "Ethernet5500.h"
 #include <SPI.h>
 // Use software SPI: CS, DI, DO, CLK
-Adafruit_MAX31865 thermo = Adafruit_MAX31865(1, 2, 3, 4);
+Adafruit_MAX31865 thermo = Adafruit_MAX31865(4, 5, 6, 7);
 //Ethernet Shield use pin 10,11,12,13 for standard SPI
 
 // The value of the Rref resistor. Use 430.0 for PT100 and 4300.0 for PT1000
@@ -13,8 +13,8 @@ Adafruit_MAX31865 thermo = Adafruit_MAX31865(1, 2, 3, 4);
 // 100.0 for PT100, 1000.0 for PT1000
 #define RNOMINAL  1000.0
 
-#define SSR_TEMP    8
-#define SSR_MAGNETS 7
+#define SSR_TEMP    3 //12V relay
+#define SSR_MAGNETS 2 //24V relay
 
 #define VERBOSE   2 //0 = No Serial Output  1 = Standard output  2 = Full output
 //Variables used for PID tunning
@@ -29,12 +29,13 @@ float ierror = 0;
 float time_tot = 1;
 float time_0[20];
 float interval = millis();
-bool heatingEnable = true;
-bool magnetEnable = true;
+bool heatingEnable = false;
+bool magnetEnable = false;
 float Kp = 1.0;
 float Kd = 150.0; //PID parameters to be tuned
 float Ki = 0.01;
 float setpoint = 37;
+#define PID_TIME 1000 //ms
 
 bool stringComplete = false;
 String dataString = "";
@@ -68,7 +69,8 @@ void setup() {
 
 
 void loop() {
-
+  delay(PID_TIME);
+  if(millis()> 86400000) software_reset(); //Reset every day 86400000
   uint16_t rtd = thermo.readRTD();
   ratio = rtd;
   temp = thermo.temperature(RNOMINAL,RREF);
@@ -115,7 +117,7 @@ void loop() {
   else{digitalWrite(SSR_TEMP,LOW);
   Serial.print("Heating Off / ");
   }
-  delay(250); //Wait 250 ms to be sure that the SSR was activated or deactivated
+  //delay(250); //Wait 250 ms to be sure that the SSR was activated or deactivated
   //Magnet control ----------------------------------------------------------------------------
   if(magnetEnable){
     digitalWrite(SSR_MAGNETS,HIGH);
@@ -129,7 +131,6 @@ void loop() {
   EthernetClient client = server.available();
   EthernetClient *client_pntr = &client;
   if(client){
-    Serial.println("New client connected");
     String currentLine = "";
     long time_connection = millis();
     while(client.connected()){
@@ -137,7 +138,7 @@ void loop() {
         currentLine = ""; //reset currentLine
         //Read the first Line
         char c = client.read();
-        while(!(c== '\n' || c == ' ' || c == '/' )){
+        while(!(c== '\n' || c == ' ' || c == '/' || c == -1)){
           currentLine += c;
           c = client.read();
         }
@@ -147,6 +148,9 @@ void loop() {
         if(currentLine == "HeatingON"){ heatingEnable = true; homePage(client_pntr);}
         if(currentLine == "HeatingOFF"){ heatingEnable = false; homePage(client_pntr);}
         if(currentLine == "ResetController"){homePage(client_pntr); software_reset();}
+        if(currentLine == "GetStatus") { AnswerHttp(client_pntr);}
+        if(currentLine == "BothON"){magnetEnable = true; heatingEnable = true; homePage(client_pntr);}
+        if(currentLine == "BothOFF"){magnetEnable = false; heatingEnable = false; homePage(client_pntr);}
       }
       //Serial.println("client connected");
       if(millis()-time_connection> TIMEOUT_ETH)
@@ -164,10 +168,10 @@ void software_reset() {
 
 int getStatus() {
 
-  if(magnetEnable && heatingEnable) return 3;
-  if(magnetEnable && !heatingEnable) return 2;
-  if(!magnetEnable && heatingEnable) return 1;
-  return 0;
+  if(magnetEnable && heatingEnable) return 3; //Both ON : status = 3
+  if(magnetEnable && !heatingEnable) return 2; //Magnet On but not heating : status = 2
+  if(!magnetEnable && heatingEnable) return 1; // Heating ON but not magnets : status = 1
+  return 0; //Both disabled : status = 0
 }
 
 
