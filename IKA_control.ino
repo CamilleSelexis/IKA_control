@@ -32,9 +32,10 @@ float interval = millis();
 bool heatingEnable = false;
 bool magnetEnable = false;
 float Kp = 1.0;
-float Kd = 150.0; //PID parameters to be tuned
+float Kd = 10.0; //PID parameters to be tuned
 float Ki = 0.01;
-float setpoint = 37;
+float setpoint = 43;
+float p_temp = 0;
 #define PID_TIME 1000 //ms
 
 bool stringComplete = false;
@@ -96,9 +97,11 @@ void loop() {
     ainterval[19] = interval;
     time_tot += interval;
     time_0[19] = time_tot;
-    derror = (aerror[19]-aerror[10])/(time_0[19]-time_0[10])*1000;
+    derror = (aerror[19]-aerror[15])/(time_0[19]-time_0[15])*1000;
     ierror = (aerror[19]*ainterval[19]+aerror[18]*ainterval[18])/(ainterval[19]+ainterval[18]);
   }
+  derror = p_temp-temp;
+  p_temp = temp;
   // PID controller = Kp*e + Ki*integral(e) + Kd*de/dt
   // error > 0 when temp < setpoint
   //&& !digitalRead(PIN_ENABLE)
