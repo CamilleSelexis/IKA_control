@@ -146,14 +146,14 @@ void loop() {
           c = client.read();
         }
         if(currentLine == "home"){ homePage(client_pntr);}
-        if(currentLine == "MagnetsON"){ magnetEnable = true; homePage(client_pntr);}
-        if(currentLine == "MagnetsOFF"){ magnetEnable  = false; homePage(client_pntr);}
-        if(currentLine == "HeatingON"){ heatingEnable = true; homePage(client_pntr);}
-        if(currentLine == "HeatingOFF"){ heatingEnable = false; homePage(client_pntr);}
-        if(currentLine == "ResetController"){homePage(client_pntr); software_reset();}
-        if(currentLine == "GetStatus") { AnswerHttp(client_pntr);}
-        if(currentLine == "BothON"){magnetEnable = true; heatingEnable = true; homePage(client_pntr);}
-        if(currentLine == "BothOFF"){magnetEnable = false; heatingEnable = false; homePage(client_pntr);}
+        if(currentLine == "magnetsON"){ magnetEnable = true; homePage(client_pntr);}
+        if(currentLine == "magnetsOFF"){ magnetEnable  = false; homePage(client_pntr);}
+        if(currentLine == "heatingON"){ heatingEnable = true; homePage(client_pntr);}
+        if(currentLine == "heatingOFF"){ heatingEnable = false; homePage(client_pntr);}
+        if(currentLine == "resetController"){homePage(client_pntr); software_reset();}
+        if(currentLine == "getStatus") { AnswerHttp(client_pntr);}
+        if(currentLine == "bothON"){magnetEnable = true; heatingEnable = true; homePage(client_pntr);}
+        if(currentLine == "bothOFF"){magnetEnable = false; heatingEnable = false; homePage(client_pntr);}
       }
       //Serial.println("client connected");
       if(millis()-time_connection> TIMEOUT_ETH)
