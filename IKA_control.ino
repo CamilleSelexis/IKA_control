@@ -1,4 +1,5 @@
 // Implemented on Arduino UNO Metro with Ethernet shield W5500
+// Version live on the IKA shaker, upload 30.01.2023
 // PID not tuned yet
 #include <Adafruit_MAX31865.h>
 #include "Ethernet5500.h"
