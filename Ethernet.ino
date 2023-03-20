@@ -32,11 +32,11 @@ void homePage(EthernetClient *client_pntr){
   client_pntr->print(" Error : ");client_pntr->print(error);client_pntr->println("</p>");
   client_pntr->print("Current PID parameters : Kp = ");client_pntr->print(Kp);client_pntr->print(" Kd = ");client_pntr->print(Kd);
   client_pntr->print(" Ki = ");client_pntr->print(Ki);client_pntr->print(" Cycle Time = "); client_pntr->print(PID_TIME);
-  client_pntr->println(F("<p><a href=\"http://192.168.1.91/heatingON\">Enable Heating</a></p>"));
-  client_pntr->println(F("<p><a href=\"http://192.168.1.91/heatingOFF\">Disable Heating</a></p>"));
-  client_pntr->println(F("<p><a href=\"http://192.168.1.91/magnetsON\">Enable Magnets</a></p>"));
-  client_pntr->println(F("<p><a href=\"http://192.168.1.91/magnetsOFF\">Disable Magnets</a></p>"));
-  client_pntr->println(F("<p><a href=\"http://192.168.1.91/resetController\">Reset Controller</a></p>"));
+  client_pntr->println(F("<p><a href=\"http://192.168.1.50/heatingON\">Enable Heating</a></p>"));
+  client_pntr->println(F("<p><a href=\"http://192.168.1.50/heatingOFF\">Disable Heating</a></p>"));
+  client_pntr->println(F("<p><a href=\"http://192.168.1.50/magnetsON\">Enable Magnets</a></p>"));
+  client_pntr->println(F("<p><a href=\"http://192.168.1.50/magnetsOFF\">Disable Magnets</a></p>"));
+  client_pntr->println(F("<p><a href=\"http://192.168.1.50/resetController\">Reset Controller</a></p>"));
   client_pntr->print("<p> Connection closed by the server at internal time : ");client_pntr->print(millis());
   //Close the connection
   client_pntr->print("</p> </body>");

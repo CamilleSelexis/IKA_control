@@ -46,9 +46,9 @@ String inputString = "";
 //Ethernet related settings
 byte mac[] = {0x2C, 0xF7, 0xF1, 0x08, 0x3F, 0xAE};  //W5500 Mac address
 
-int8_t ip_addr[4] = {192,168,1,91};
-String strIP = "192.168.1.91";
-IPAddress ip(192,168,1,91);
+int8_t ip_addr[4] = {192,168,1,50};
+String strIP = "192.168.1.50";
+IPAddress ip(192,168,1,50);
 IPAddress gateway(192,168,1,1);
 IPAddress subnet(255, 255, 255, 0);
 IPAddress myDns(8, 8, 8, 8); // google puble dns
